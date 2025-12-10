@@ -68,23 +68,61 @@ public class GeneticAlgorithm {
         return this.population;
     }
     
-    // P4 Task: Selection (Placeholder method)
+    // P4 Task: Selection (Tournament Selection)
     private Chromosome selectParent() {
-        // Implement Tournament or Roulette Wheel Selection here (P4 will fill this)
-        // Placeholder returns a random one for structural testing
-        return population.get((int) (Math.random() * POPULATION_SIZE)); 
+        // 1. Create a "Tournament" of random candidates
+        int tournamentSize = 5; 
+        Chromosome best = null;
+
+        for (int i = 0; i < tournamentSize; i++) {
+            // Pick a random index
+            int randomIndex = (int) (Math.random() * population.size());
+            Chromosome candidate = population.get(randomIndex);
+
+            // 2. Determine if this candidate is the best so far
+            if (best == null || candidate.getFitness() > best.getFitness()) {
+                best = candidate;
+            }
+        }
+        // 3. Return the winner
+        return best;
     }
     
-    // P4 Task: Crossover (Placeholder method)
+    // P4 Task: Crossover (Uniform Crossover)
     private Chromosome crossover(Chromosome p1, Chromosome p2) {
-        // Implement Single-point or Uniform Crossover here (P4 will fill this)
-        // Placeholder returns a copy of p1
-        return new Chromosome(p1.getQ1(), p1.getQ2()); 
+        // Check Crossover Rate (e.g. 90% chance to mix, 10% chance to just clone p1)
+        if (Math.random() > CROSSOVER_RATE) {
+            return new Chromosome(p1.getQ1(), p1.getQ2());
+        }
+
+        // 1. Mix Genes
+        // 50% chance to get q1 from p1, otherwise from p2
+        double childQ1 = (Math.random() < 0.5) ? p1.getQ1() : p2.getQ1();
+        
+        // 50% chance to get q2 from p1, otherwise from p2
+        double childQ2 = (Math.random() < 0.5) ? p1.getQ2() : p2.getQ2();
+
+        // 2. Return new Child
+        return new Chromosome(childQ1, childQ2);
     }
     
-    // P4 Task: Mutation (Placeholder method)
+    // P4 Task: Mutation
     private void mutate(Chromosome c) {
-        // Implement angle perturbation (P4 will fill this)
+        // 1. Mutate q1?
+        if (Math.random() < MUTATION_RATE) {
+            // Add a small random value between -0.1 and 0.1 radians
+            double mutationAmount = (Math.random() * 0.2) - 0.1;
+            c.setQ1(c.getQ1() + mutationAmount);
+        }
+
+        // 2. Mutate q2?
+        if (Math.random() < MUTATION_RATE) {
+            double mutationAmount = (Math.random() * 0.2) - 0.1;
+            c.setQ2(c.getQ2() + mutationAmount);
+        }
+
+        // 3. Keep angles valid (Use the helper provided in Chromosome.java)
+        c.clampAngles();
     }
 
     // P4 and P2 Coordination: Fitness Calculation
