@@ -5,15 +5,18 @@ import java.util.Comparator;
 import java.util.List;
 
 public class GeneticAlgorithm {
-    // 1. GA Parameters (Tuning is P5's job)
-    private static final int POPULATION_SIZE = 100;
-    private static final double MUTATION_RATE = 0.05;
+    // Small constant to avoid division by zero in fitness calculation
+    public static final double EPSILON = 1e-8;
+    
+    // 1. GA Parameters
+    private static final int POPULATION_SIZE = 250;
+    private static final double MUTATION_RATE = 0.1;
     private static final double CROSSOVER_RATE = 0.90;
     private static final int ELITISM_COUNT = 5;
     
     // 2. Population and Dependencies
     private List<Chromosome> population;
-    private final RobotArm2D robotArm; // P2's class
+    private final RobotArm2D robotArm; 
     private final double targetX;
     private final double targetY;
     
@@ -24,18 +27,18 @@ public class GeneticAlgorithm {
         this.population = new ArrayList<>();
     }
     
-    // P3 Task: Initialize the population
+    // Initialize the population
     public void initializePopulation() {
         for (int i = 0; i < POPULATION_SIZE; i++) {
             population.add(new Chromosome());
         }
     }
     
-    // P3 Task: The Main Loop Engine (P4 implements the details)
+    // The Main Loop Engine
     public List<Chromosome> evolvePopulation() {
         List<Chromosome> newPopulation = new ArrayList<>();
         
-        // 1. Elitism: Preserve the best individuals (P5 will need this for tuning)
+        // 1. Elitism: Preserve the best individuals
         // Sort population by fitness (descending)
         population.sort(Comparator.comparing(Chromosome::getFitness).reversed());
         
@@ -47,28 +50,28 @@ public class GeneticAlgorithm {
         // 2. Main Loop: Generate the rest of the new population
         while (newPopulation.size() < POPULATION_SIZE) {
             
-            // a. Selection (P4's logic)
-            Chromosome parent1 = selectParent(); // P4 will write the selection logic
-            Chromosome parent2 = selectParent(); // P4 will write the selection logic
+            // a. Selection 
+            Chromosome parent1 = selectParent(); 
+            Chromosome parent2 = selectParent(); 
             
-            // b. Crossover (P4's logic)
-            Chromosome child = crossover(parent1, parent2); // P4 will write the crossover logic
+            // b. Crossover 
+            Chromosome child = crossover(parent1, parent2); 
             
-            // c. Mutation (P4's logic)
-            mutate(child); // P4 will write the mutation logic
+            // c. Mutation 
+            mutate(child); 
             
             newPopulation.add(child);
         }
         
         this.population = newPopulation;
         
-        // 3. Fitness Calculation (P4 and P2 coordination)
-        calculateFitness(); // P4 will primarily write the fitness math
+        // 3. Fitness Calculation 
+        calculateFitness(); 
         
         return this.population;
     }
     
-    // P4 Task: Selection (Tournament Selection)
+    // Selection (Tournament Selection)
     private Chromosome selectParent() {
         // 1. Create a "Tournament" of random candidates
         int tournamentSize = 5; 
@@ -88,7 +91,7 @@ public class GeneticAlgorithm {
         return best;
     }
     
-    // P4 Task: Crossover (Uniform Crossover)
+    // Crossover (Uniform Crossover)
     private Chromosome crossover(Chromosome p1, Chromosome p2) {
         // Check Crossover Rate (e.g. 90% chance to mix, 10% chance to just clone p1)
         if (Math.random() > CROSSOVER_RATE) {
@@ -106,7 +109,7 @@ public class GeneticAlgorithm {
         return new Chromosome(childQ1, childQ2);
     }
     
-    // P4 Task: Mutation
+    // Mutation
     private void mutate(Chromosome c) {
         // 1. Mutate q1?
         if (Math.random() < MUTATION_RATE) {
@@ -121,23 +124,22 @@ public class GeneticAlgorithm {
             c.setQ2(c.getQ2() + mutationAmount);
         }
 
-        // 3. Keep angles valid (Use the helper provided in Chromosome.java)
+        // 3. Keep angles valid
         c.clampAngles();
     }
 
-    // P4 and P2 Coordination: Fitness Calculation
+    // Fitness Calculation
     public void calculateFitness() {
         for (Chromosome c : population) {
-            // P2's FK is called here
             double[] endEffectorPos = robotArm.getEndEffectorPosition(c.getQ1(), c.getQ2());
             double xE = endEffectorPos[0];
             double yE = endEffectorPos[1];
-            
-            // P4's Euclidean Distance logic is applied here
-            double error = Math.sqrt(Math.pow(xE - targetX, 2) + Math.pow(yE - targetY, 2));
-            
-            // P4's Fitness transformation: Maximize 1 / (1 + Error)
-            double fitness = 1.0 / (1.0 + error); 
+
+            // Raw fitness function: Euclidean distance to target
+            double error = Math.sqrt(Math.pow(targetX - xE, 2) + Math.pow(targetY - yE, 2));
+
+            // Fitness function: higher is better, avoid division by zero
+            double fitness = 1.0 / (error + EPSILON);
             c.setFitness(fitness);
         }
     }

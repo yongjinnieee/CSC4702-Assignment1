@@ -1,0 +1,25 @@
+# Java class files
+*.class
+
+# Build output
+target/
+build/
+
+# IDE files
+*.iml
+.idea/
+*.log
+*.swp
+*.swo
+.DS_Store
+
+# VS Code settings
+.vscode/
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# JAR files
+*.jar
+
