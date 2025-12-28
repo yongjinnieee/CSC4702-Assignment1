@@ -6,7 +6,7 @@ public class IKOptimizer {
     private final double targetX;
     private final double targetY;
     
-    // Link lengths 
+    // Link lengths (fixed for this example)
     private final double a1 = 10.0; 
     private final double a2 = 8.0; 
     
@@ -14,7 +14,6 @@ public class IKOptimizer {
     private static final int MAX_GENERATIONS = 300;
     private static final double ERROR_TOLERANCE = 0.01;
     
-    // TODO: Connect Part B GA with Jeevan's and Eugene's classes for visualization
     private final RobotArm2D robotArm;
     
     public IKOptimizer(double targetX, double targetY) {
